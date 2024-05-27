@@ -83,3 +83,14 @@ $user->log('This is a log message.');
 Log message: This is a log message.
 
 ------------------------------------------------------------------------------------------------
+
+# Video 2 (Working with Postman)
+
+# The browser isn't a sufficient tool for working with web APIs. Instead, we need an HTTP debugger. There are many available, but we'll use Postman in this series. The right tool makes all the difference in the world.
+
+# Download it.
+# make workspace.
+# make collection.
+# make a request of get and post simple and save it with a proper name.
+# if it is post request so you have to write your data in form-data of body. or anyother option.
+# if you have validation then it may be give some wierd responses so you have to add an (accept = "application/json) parameter to header so the response of error will be in json format.
