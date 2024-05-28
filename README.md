@@ -84,7 +84,7 @@ Log message: This is a log message.
 
 ------------------------------------------------------------------------------------------------
 
-# Video 2 (Working with Postman)
+# Video 3 (Working with Postman)
 
 # The browser isn't a sufficient tool for working with web APIs. Instead, we need an HTTP debugger. There are many available, but we'll use Postman in this series. The right tool makes all the difference in the world.
 
@@ -94,3 +94,40 @@ Log message: This is a log message.
 # make a request of get and post simple and save it with a proper name.
 # if it is post request so you have to write your data in form-data of body. or anyother option.
 # if you have validation then it may be give some wierd responses so you have to add an (accept = "application/json) parameter to header so the response of error will be in json format.
+
+--------------------------------------------------------------------------------------------------
+
+# Video 3 (Designing the Url)
+
+# Every application has a user interface--even web APIs! Except that our UI is the URL because that how users interact with our application. So, it's important to think about our URLs and design them to be logically usable.
+
+# URL:
+# A URL (Uniform/Universal Resource Locator) is a reference or address used to access resources on the internet.
+
+# Components of a URL
+# Scheme: Indicates the protocol used to access the resource (e.g., http, https, ftp).
+# Host: The domain name or IP address of the server where the resource is located (e.g., www.example.com).
+# Port: Optional and specifies the port number to connect to on the server (e.g., :80 for HTTP or :443 for HTTPS).
+# Path: Specifies the exact location of the resource on the server (e.g., /path/to/resource).
+# Query String: Optional and provides additional parameters or inputs in key-value pairs (e.g., ?key1=value1&key2=value2).
+# Fragment: Optional and indicates a specific part of the resource, often used in HTML documents to navigate to a section within the page (e.g., #section1).
+
+# Example of a URL
+https://www.example.com:443/path/to/resource?search=query#section1
+
+# Example of apis
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+Route::post('/users', [UserController::class, 'store']);
+Route::put('/users/{id}', [UserController::class, 'update']);
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+'title' => fake()->words(3, true),
+
+# it will create 3 word and passign true will return string.
+
+Ticket::factory(100)->recycle($users)->create();
+
+# the recycle will take user and assign random user to ticket.
+
+-------------------------------------------------------------------------------------------------------------------
