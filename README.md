@@ -131,3 +131,52 @@ Ticket::factory(100)->recycle($users)->create();
 # the recycle will take user and assign random user to ticket.
 
 -------------------------------------------------------------------------------------------------------------------
+
+# Video 4 (How to Version Your API)
+
+# Versioning is one of the most important parts of designing an API. It protects you from making breaking changes for your clients, and it helps to structure your project in a logical manner. Let's look at one of the ways you can implement versioning for your API.
+
+php artisan make:controller Api/V1/TicketController --resource --model=Ticket --requests
+
+# this command will make controller with all the function we need and it will use the model which we mentioned and with the request
+
+# api versions rule
+# 1. make api_v1.php (api_version.php) file in routes folder.
+# 2. then you have to register this route in app.php file in bootstrap folder like below.
+# 3. make folder of Api/V1 everywhere where you have related files.
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+        then: function () {
+            Route::middleware('api')
+                ->prefix('api/v1')
+                ->group(base_path('routes/api_v1.php'));
+        },
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+        //
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })->create();
+
+----------------------------------------------------------
+
+then: function () {
+    Route::middleware('api')
+        ->prefix('api/v1')
+        ->group(base_path('routes/api_v1.php'));
+},
+
+# you can register cutom route like this.
+
+Route::apiResource('tickets', TicketController::class);
+
+# here we use apiResource which will create route for apis not all routes it will exclude route like create, edit etc.
+
+------------------------------------------------------------------------------------------------------------
+
