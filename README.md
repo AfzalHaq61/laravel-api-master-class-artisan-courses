@@ -180,3 +180,34 @@ Route::apiResource('tickets', TicketController::class);
 
 ------------------------------------------------------------------------------------------------------------
 
+# Video 5 (Authentication Using Tokens)
+
+# Unlike typical web applications, APIs rely on tokens to determine if clients are authenticated. In this episode, you'll learn how to generate Sanctum tokens for clients and protect routes with the Sanctum middleware.
+
+# there is another ways but we will create token and token will be created on sanctum because it is easy and provice all requirements.
+
+# add HasApiToken to User model.
+# and this function will authenticate user and then create a token for user and formated it ot plain text.
+# then you have to provide this token in postman in barear token of authrizationtan.
+# add middleware('auth:sanctum') to your routes if the user is login with this token you provided then it will respone otherwise it will not.
+
+public function login(LoginUserRequest $request) {
+    $request->validated($request->all());
+
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        return $this->error('Invalid credentials', 401);
+    }
+
+    $user = User::firstWhere('email', $request->email);
+
+    return $this->ok(
+        'Authenticated',
+        [
+            'token' => $user->createToken('API token for ' . $user->email)->plainTextToken
+        ]
+        );
+}
+
+Route::middleware('auth:sanctum')->apiResource('tickets', TicketController::class);
+
+----------------------------------------------------------------------------------------------------------------
