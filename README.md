@@ -211,3 +211,51 @@ public function login(LoginUserRequest $request) {
 Route::middleware('auth:sanctum')->apiResource('tickets', TicketController::class);
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 6 (Revoking Authentication Tokens)
+
+# It is important to learn how to revoke client tokens to ensure the security of your API. I'll show you how to do that, as well as set an expiration time for your tokens.
+
+# byy default sanctum tokens are not foing to expired but it depend on the condition where you want to expire your tokens or not so here we need to expire our token it may done in many cases we hace three diff ways.
+
+# 1. it will delete all the user tokens.
+# but we dont have delete all the tokens for the user because it may be for something imp we need to delete specific token for the auth.
+# it may be used when we delete user account.
+public function logout(Request $request) {
+    $request->user()->tokens()->delete();
+}
+
+# 2. it will delete user token by id but now we dont have one.
+public function logout(Request $request) {
+    $request->user()->tokens()->where('id', $tokenId)->delete();
+}
+
+# 3. it will delete user token by current token on which we authenticated.
+public function logout(Request $request) {
+    $request->user()->currentAccessToken()->delete();
+}
+
+# we need post route and it must have auth:sanctum middleware so it pass the token to thr function.
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+
+# we can also make global env variables in env so we can use it all over project
+# and one way is just select all the token an option will appear on which create new env variable make a name BAREAR and make it global.
+
+return $this->ok(
+    'Authenticated',
+        [
+            'token' => $user->createToken(
+                'API token for ' . $user->email,
+                ['*'],
+                now()->addMonth())->plainTextToken
+        ]
+    );
+
+# when we create a token for user then the first parameter is for name, the second parameter is for the abilities (her we pass ['*'] for all the abilities) and the third parameter is for expiration date of the token. it will directly store data in personal access token table in the database and the token id will be generated against the user id.
+
+# by default the expiration date of the token is empty but we can change it in sanctum configuration in sanctum.php in config folder but change the expiration date from null to any time we want but it accepts the time in minutes. 
+
+# This value controls the number of minutes until an issued token will be | considered expired. This will override any values set in the token's | "expires_at" attribute, but first-party sessions are not affected.
+
+----------------------------------------------------------------------------------------------------------------------
+
