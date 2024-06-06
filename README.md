@@ -239,7 +239,7 @@ public function logout(Request $request) {
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 # we can also make global env variables in env so we can use it all over project
-# and one way is just select all the token an option will appear on which create new env variable make a name BAREAR and make it global.
+# and one way is just hold the token an option will appear on which create new env variable make a name BAREAR and make it global.
 
 return $this->ok(
     'Authenticated',
@@ -259,3 +259,87 @@ return $this->ok(
 
 ----------------------------------------------------------------------------------------------------------------------
 
+# Video 7 (Designing Response Payloads)
+
+# The JSON response we send to clients are probably the most important things about our API--it's what clients are coming to our API for. It's not good enough (or safe) to just dump an Eloquent model to the response. So in this episode, you'll learn how to transform Eloquent models into well-structured JSON.
+
+# resource resturn collection of paginated jsom controll formatted data.
+public function index()
+{
+    return TicketResource::collection(Ticket::paginate());
+}
+
+class TicketResource extends JsonResource
+{
+# by default the wrap is data and we can change it like this. here we change it to ticket
+    // public static $wrap = 'ticket';
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'type' => 'ticket',
+            'id' => $this->id,
+            'attributes' => [
+                'title' => $this->title,
+                'description' => $this->description,
+                'status' => $this->status,
+                'createdAt' => $this->created_at,
+                'updatedAt' => $this->updated_at
+            ],
+            'relationships' => [
+                'author' => [
+                    'data' => [
+                        'type' => 'user',
+                        'id' => $this->user_id
+                    ],
+                    'links' => [
+                        ['self' => 'todo']
+                    ]
+                ]
+            ],
+            'links' => [
+                ['self' => route('tickets.show', ['ticket' => $this->id])]
+            ]
+        ];
+    }
+}
+
+# result
+
+{
+    "data": {
+        "type": "ticket",
+        "id": 1,
+        "attributes": {
+            "title": "fugiat iure soluta",
+            "description": "Eum at voluptatem ipsam ut. Animi in et voluptatem sit voluptas omnis sapiente accusamus. Omnis voluptatem perspiciatis et eius aliquam aut quos et.",
+            "status": "C",
+            "createdAt": "2024-05-28T01:43:03.000000Z",
+            "updatedAt": "2024-05-28T01:43:03.000000Z"
+        },
+        "relationships": {
+            "author": {
+                "data": {
+                    "type": "user",
+                    "id": 1
+                },
+                "links": [
+                    {
+                        "self": "todo"
+                    }
+                ]
+            }
+        },
+        "links": [
+            {
+                "self": "http://127.0.0.1:8000/api/v1/tickets/1"
+            }
+        ]
+    }
+}
+
+------------------------------------------------------------------------------------------------
