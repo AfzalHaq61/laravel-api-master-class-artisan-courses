@@ -3,6 +3,7 @@
 namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Request;
+use App\Http\Resources\V1\UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TicketResource extends JsonResource
@@ -20,7 +21,10 @@ class TicketResource extends JsonResource
             'id' => $this->id,
             'attributes' => [
                 'title' => $this->title,
-                'description' => $this->description,
+                'description' => $this->when(
+                    $request->routeIs('tickets.show'),
+                    $this->description
+                ),
                 'status' => $this->status,
                 'createdAt' => $this->created_at,
                 'updatedAt' => $this->updated_at
@@ -35,6 +39,9 @@ class TicketResource extends JsonResource
                         ['self' => 'todo']
                     ]
                 ]
+            ],
+            'includes' => [
+                new UserResource($this->user)
             ],
             'links' => [
                 ['self' => route('tickets.show', ['ticket' => $this->id])]

@@ -343,3 +343,82 @@ class TicketResource extends JsonResource
 }
 
 ------------------------------------------------------------------------------------------------
+
+# Video 8 (Conditionally Omitting and Including Data)
+
+# Different routes typically need to return different JSON structures--even if those routes work with the same resource. You can create as many Resource classes as you need to fit every situation, or you can use the tools the JsonResource class provides to conditionally omit and include data.
+
+class TicketResource extends JsonResource
+{
+    // public static $wrap = 'ticket';
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'type' => 'ticket',
+            'id' => $this->id,
+            'attributes' => [
+                'title' => $this->title,
+# here we can apply condition on some attribute if the route is not selected one then not show it.
+                'description' => $this->when(
+                    $request->routeIs('tickets.show'),
+                    $this->description
+                ),
+                'status' => $this->status,
+                'createdAt' => $this->created_at,
+                'updatedAt' => $this->updated_at
+            ],
+            'relationships' => [
+                'author' => [
+                    'data' => [
+                        'type' => 'user',
+                        'id' => $this->user_id
+                    ],
+                    'links' => [
+                        ['self' => 'todo']
+                    ]
+                ]
+            ],
+# directly adding user resouce in ticket resource by calling user resource here
+            'includes' => [
+                new UserResource($this->user)
+            ],
+            'links' => [
+                ['self' => route('tickets.show', ['ticket' => $this->id])]
+            ]
+        ];
+    }
+}
+
+# user resource for an api.
+class UserResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'type' => 'user',
+            'id' => $this->id,
+            'attributes' => [
+                'name' => $this->name,
+                'email' => $this->email,
+# we can group attributes by condition and merge it with attributes.
+                $this->mergeWhen($request->routeIs('users.*'), [
+                    'emailVerifiedAt' => $this->email_verified_at,
+                    'createdAt' => $this->created_at,
+                    'udpatedAt' => $this->updated_at,
+                ])
+            ]
+        ];
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
