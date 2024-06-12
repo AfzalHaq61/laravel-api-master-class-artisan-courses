@@ -422,3 +422,61 @@ class UserResource extends JsonResource
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 9 (Using Optional Parameters to Load Optional Data)
+
+# Some data, such as relationship data, doesn't need to be loaded and sent with every response. Instead, we want to give the client the option to include that data. In this episode, we'll use an include query parameter to allow clients to opt-in to loading relationship data.
+
+# api controller is base class and we are expending it in this class.
+# we call include function from base class and pass parameter.
+# if we take model values from parameter directly then we can take relationships data with load instead of with();
+class TicketController extends ApiController
+{
+    public function index()
+    {
+        if ($this->include('author')) {
+            return TicketResource::collection(Ticket::with('user')->paginate());
+        }
+
+        return TicketResource::collection(Ticket::paginate());
+    }
+
+    public function show(Ticket $ticket)
+    {
+        if ($this->include('author')) {
+            return new TicketResource($ticket->load('user'));
+        }
+
+        return new TicketResource($ticket);
+    }
+}
+
+# it will return false if there is no param and if there is params then it will return those params in arrayy.
+class ApiController extends Controller
+{
+    public function include(string $relationship) : bool {
+        $param = request()->get('include');
+
+        if (!isset($param)) {
+            return false;
+        }
+
+        $includeValues = explode(',', strtolower($param));
+
+        return in_array(strtolower($relationship), $includeValues);
+    }
+}
+
+# here we use optionol the includes if the user is loaded when resource is called then it will show includes but if it is not loaded then it will not show it.
+public function toArray(Request $request): array
+{
+    return [
+        'type' => 'ticket',
+        .......
+        ......
+        'includes' => new UserResource($this->whenLoaded('user')),
+        ....
+    ];
+}
+
+----------------------------------------------------------------------------------------------------------------
