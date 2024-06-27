@@ -480,3 +480,112 @@ public function toArray(Request $request): array
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 10 (Writing Filters)
+
+# Clients need to be able to filter the data that we provide. We can approach filters in a variety of ways, but in this episode, we'll map query string parameters directly to methods on a filter class.
+
+http://127.0.0.1:8000/api/v1/tickets?filters[title]=*soluta*s
+
+# we will pass query string parameters in array format and we can pass more than one filter and filter data like this.
+
+http://127.0.0.1:8000/api/v1/tickets?filters[title]=*soluta*&filters[status]=completed,cancelled
+http://127.0.0.1:8000/api/v1/tickets?filters[title]=*soluta*&filters[status]=soluta
+
+# controller index function
+# filter are collected by TicketFilter and pass to scode filter of Filter Model
+public function index(TicketFilter $filters)
+{
+    return TicketResource::collection(Ticket::filter($filters)->paginate());
+}
+
+# filter function in Filter Model
+# scope filter pass query builder to apply function.
+public function scopeFilter(Builder $builder, QueryFilter $filters) {
+    return $filters->apply($builder);
+}
+
+# Query Filter Class
+# apply function check functions of filter byy key of th filter and pass value to that function.
+<?php
+
+namespace App\Http\Filters\V1;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+
+abstract class QueryFilter {
+    protected $builder;
+    protected $request;
+
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
+
+    protected function filter($arr) {
+        foreach($arr as $key => $value) {
+            if (method_exists($this, $key)) {
+                $this->$key($value);
+            }
+        }
+
+        return $this->builder;
+    }
+
+    public function apply(Builder $builder) {
+        $this->builder = $builder;
+
+        foreach($this->request->all() as $key => $value) {
+            if (method_exists($this, $key)) {
+                $this->$key($value);
+            }
+        }
+
+        return $builder;
+    }
+}
+
+
+# class Ticket Filter
+# here we filter our data and return it.
+<?php
+
+namespace App\Http\Filters\V1;
+
+class TicketFilter extends QueryFilter {
+    public function createdAt($value) {
+        $dates = explode(',', $value);
+
+        if (count($dates) > 1) {
+            return $this->builder->whereBetween('created_at', $dates);
+        }
+
+        return $this->builder->whereDate('created_at', $value);
+    }
+
+    public function include($value) {
+        return $this->builder->with($value);
+    }
+
+    public function status($value) {
+        return $this->builder->whereIn('status', explode(',', $value));
+    }
+
+    public function title($value) {
+        $likeStr = str_replace('*', '%', $value);
+        return $this->builder->where('title', 'like', $likeStr);
+    }
+
+    public function updatedAt($value) {
+        $dates = explode(',', $value);
+
+        if (count($dates) > 1) {
+            return $this->builder->whereBetween('updated_at', $dates);
+        }
+
+        return $this->builder->whereDate('updated_at', $value);
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
