@@ -589,3 +589,37 @@ class TicketFilter extends QueryFilter {
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 11 (Using (and Filtering) Nested Resources)
+
+# Filtering ticket data based on the author ID is a little more complex than the basic filters we implemented in the previous episode. To be consistent with our payload, we'll access the author ID filter with a relationships query string parameter, and we'll apply the same methodology to our basic attributes, too.
+
+# api call to call tickets of the user and filter it.
+# we can call by inlclude but we cant filter it.
+http://127.0.0.1:8000/api/v1/authors/5/tickets?filter[status]=C
+
+# routes for tickets under resources.
+
+# The 'authors.tickets' part indicates a nested resource. This means that the routes for tickets are nested within the context of authors. The route definitions will include the author's ID, making it clear which author's tickets are being referred to.
+
+# Routes Created
+# The apiResource method will generate the following routes:
+
+# Index: GET /authors/{author}/tickets - Lists all tickets for a specific author.
+# Store: POST /authors/{author}/tickets - Creates a new ticket for a specific author.
+# Show: GET /authors/{author}/tickets/{ticket} - Shows a specific ticket for a specific author.
+# Update: PUT/PATCH /authors/{author}/tickets/{ticket} - Updates a specific ticket for a specific author.
+# Destroy: DELETE /authors/{author}/tickets/{ticket} - Deletes a specific ticket for a specific author.
+
+Route::middleware('auth:sanctum')->apiResource('authors.tickets', AuthorTicketsController::class);
+
+class AuthorTicketsController extends Controller
+{
+    public function index($author_id, TicketFilter $filters) {
+        return TicketResource::collection(
+            Ticket::where('user_id', $author_id)->filter($filters)->paginate()
+        );
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
