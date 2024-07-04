@@ -623,3 +623,49 @@ class AuthorTicketsController extends Controller
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 12 (Sorting Data)
+
+# An API is a glorified data access layer. So, it's not enough to just provide the ability to fetch and filter data; clients need to be able to sort on any attribute.
+
+# url from postman that how to pass sort variables
+http://127.0.0.1:8000/api/v1/tickets?sort=status,-title
+
+# sortable array
+protected $sortable = [
+    'name',
+    'email',
+    'createdAt' => 'created_at',
+    'updatedAt' => 'updated_at'
+];
+
+# sort function
+protected function sort($value) {
+#   if pass nore than one parameter.
+    $sortAttributes = explode(',', $value);
+
+    foreach($sortAttributes as $sortAttribute) {
+        $direction = 'asc';
+
+#       if there is -1 before param then take as desc order.
+        if (strpos($sortAttribute, '-') === 0) {
+            $direction = 'desc';
+            $sortAttribute = substr($sortAttribute, 1);
+        }
+
+#       if coulmn not found in sortable or key not found in sortable varuables then it will not be present in table so      skip that param.
+        if (!in_array($sortAttribute, $this->sortable) && !array_key_exists($sortAttribute, $this->sortable)) {
+            continue;
+        }
+
+        $columnName = $this->sortable[$sortAttribute] ?? null;
+
+        if ($columnName === null) {
+            $columnName = $sortAttribute;
+        }
+
+        $this->builder->orderBy($columnName, $direction);
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
