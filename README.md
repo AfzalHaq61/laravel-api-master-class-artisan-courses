@@ -669,3 +669,43 @@ protected function sort($value) {
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 13 (Creating Resources with Post Requests)
+
+# APIs need to provide much more than just fetching data; clients need to be able to create resources.
+
+# we can make rules for request like this if some data is array we can define it like this 'data.attributes.title'
+# we can also make diff rules if the route is change like in if condition.
+# we can also defien which sata should eb consider liek this (in:A,C,H,X)
+public function rules(): array
+{
+    $rules = [
+        'data.attributes.title' => 'required|string',
+        'data.attributes.description' => 'required|string',
+        'data.attributes.status' => 'required|string|in:A,C,H,X',
+    ];
+
+    if ($this->routeIs('tickets.store')) {
+        $rules['data.relationships.author.data.id'] = 'required|integer';
+    }
+
+    return $rules;
+}
+
+# we can also make our own messeges.
+public function messages() {
+    return [
+        'data.attributes.status' => 'The data.attributes.status value is invalid. Please use A, C, H, or X.'
+    ];
+}
+
+# we can check model if it is not found then we can catch error by try adn catch
+try {
+    $user = User::findOrFail($request->input('data.relationships.author.data.id'));
+} catch (ModelNotFoundException $exception) {
+    return $this->ok('User not found', [
+        'error' => 'The provided user id does not exists'
+    ]);
+}
+
+----------------------------------------------------------------------------------------------------------------
