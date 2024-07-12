@@ -8,6 +8,7 @@ use App\Http\Resources\V1\TicketResource;
 use App\Http\Requests\UpdateTicketRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Requests\Api\V1\StoreTicketRequest;
 
 class TicketController extends ApiController
 {
