@@ -709,3 +709,9 @@ try {
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 14 (Deleting Resources with Delete Requests)
+
+# Deleting resources is probably the most straight-forward thing you will implement in your API.
+
+----------------------------------------------------------------------------------------------------------------
