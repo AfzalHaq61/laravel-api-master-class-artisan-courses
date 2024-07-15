@@ -715,3 +715,19 @@ try {
 # Deleting resources is probably the most straight-forward thing you will implement in your API.
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 15 (Replacing Resources with Put Requests)
+
+# There are two types of requests used to update a resource: PATCH and PUT, and they both do completely different things.
+
+# PATCH and PUT are HTTP methods used in RESTful API design for updating resources, but they have different implications and use cases:
+
+# PUT: The PUT method is used to update or replace an existing entire resource
+
+# PATCH: Use PATCH when you want to update specific fields or properties of a resource.
+
+# here we make resource routes and then avoid update route in it.
+# then make another route of put instead of update to use custo routes of put isntead of update.
+Route::apiResource('tickets', TicketController::class)->except(['update']);
+Route::put('tickets/{ticket}', [TicketController::class, 'replace']);
+----------------------------------------------------------------------------------------------------------------

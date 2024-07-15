@@ -63,9 +63,29 @@ class TicketController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTicketRequest $request, Ticket $ticket)
+    public function update(UpdateTicketRequest $request, $ticket_id)
     {
-        //
+        // PATCH
+    }
+
+    public function replace(ReplaceTicketRequest $request, $ticket_id) {
+        // PUT
+        try {
+            $ticket = Ticket::findOrFail($ticket_id);
+
+            $model = [
+                'title' => $request->input('data.attributes.title'),
+                'description' => $request->input('data.attributes.description'),
+                'status' => $request->input('data.attributes.status'),
+                'user_id' => $request->input('data.relationships.author.data.id')
+            ];
+
+            $ticket->update($model);
+
+            return new TicketResource($ticket);
+        } catch (ModelNotFoundException $exception) {
+            return $this->error('Ticket cannot be found.', 404);
+        }
     }
 
     /**
