@@ -730,4 +730,81 @@ try {
 # then make another route of put instead of update to use custo routes of put isntead of update.
 Route::apiResource('tickets', TicketController::class)->except(['update']);
 Route::put('tickets/{ticket}', [TicketController::class, 'replace']);
+
+----------------------------------------------------------------------------------------------------------------
+
+# Video 16 (Updating Resources with Patch Requests)
+
+# Updating resources with PATCH requests is a little more involved than with PUT requests--primarily because we have to update only the data that was provided in the request.
+
+# here we used $request->mappedAttributes() just to manified code and its defined in BaseTicketRequest.
+
+public function update(UpdateTicketRequest $request, $ticket_id)
+{
+    // PATCH
+    try {
+        $ticket = Ticket::findOrFail($ticket_id);
+
+        $ticket->update($request->mappedAttributes());
+
+        return new TicketResource($ticket);
+    } catch (ModelNotFoundException $exception) {
+        return $this->error('Ticket cannot be found.', 404);
+    }
+}
+
+# its used for validation but it extend BaseTicektRequest class in which we implement common code just like messeges and mappedattribute funtion.
+
+class ReplaceTicketRequest extends BaseTicketRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        // rules
+    }
+}
+
+# mapped attribite function work like the way that it checks every key in attribute map when it is not null then it update attribute to update varible with its key and value and in a result the variable contain only those attrbute which is not null and return to the funciton so here we manified our code to one line in a lot spaces.
+
+class BaseTicketRequest extends FormRequest
+{
+    public function mappedAttributes() {
+        $attributeMap = [
+            'data.attributes.title' => 'title',
+            'data.attributes.description' => 'description',
+            'data.attributes.status' => 'status',
+            'data.attributes.createdAt' => 'created_at',
+            'data.attributes.updatedAt' => 'updated_at',
+            'data.relationships.author.data.id' => 'user_id',
+        ];
+
+        $attributesToUpdate = [];
+        foreach ($attributeMap as $key => $attribute) {
+            if ($this->has($key)) {
+                $attributesToUpdate[$attribute] = $this->input($key);
+            }
+        }
+
+        return $attributesToUpdate;
+    }
+
+    public function messages() {
+        return [
+            'data.attributes.status' => 'The data.attributes.status value is invalid. Please use A, C, H, or X.'
+        ];
+    }
+}
+
 ----------------------------------------------------------------------------------------------------------------
