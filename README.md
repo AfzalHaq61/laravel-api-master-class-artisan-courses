@@ -808,3 +808,102 @@ class BaseTicketRequest extends FormRequest
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 17 (Using Policies for User Authorization)
+
+# User authorization is so much more than determining if a user can do something. It also involves determining if a user can do something for a specific resource.
+
+# command to run policy
+php artisan make:policy TicketPolicy
+
+# we have create an update method in policy which will work like if the loign user id is equal to ticket user id if same it will authorize;
+class TicketPolicy
+{
+    /**
+     * Create a new policy instance.
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    public function update(User $user, Ticket $ticket) {
+        // TODO check for token ability
+        return $user->id === $ticket->user_id;
+    }
+}
+
+# boot Ticketpolicy to Ticket class model in app service provider boot byy gate facade. it will apply to this class.
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        Gate::policy(Ticket::class, TicketPolicy::class);
+    }
+}
+
+# make an isAble method in which we pass method of update or the specific functionolity function to it and or data model.
+class TicketController extends ApiController
+{
+    protected $policyClass = TicketPolicy::class;
+
+    public function update(UpdateTicketRequest $request, $ticket_id)
+    {
+        // PATCH
+        try {
+            $ticket = Ticket::findOrFail($ticket_id);
+
+            // policy
+            $this->isAble('update', $ticket);
+
+            $ticket->update($request->mappedAttributes());
+
+            return new TicketResource($ticket);
+        } catch (ModelNotFoundException $exception) {
+            return $this->error('Ticket cannot be found.', 404);
+        } catch (AuthorizationException $ex) {
+            return $this->error('You are not authorized to update that resource', 401);
+        }
+    }
+}
+
+# here we create a general method which will be able for all policy functionality where we pass the ability to authorize and the modal class and also the policy further it will directly called that ability method and apply on the target module.
+class ApiController extends Controller
+{
+    use ApiResponses;
+
+    protected $policyClass;
+
+    public function include(string $relationship) : bool {
+        $param = request()->get('include');
+
+        if (!isset($param)) {
+            return false;
+        }
+
+        $includeValues = explode(',', strtolower($param));
+
+        return in_array(strtolower($relationship), $includeValues);
+    }
+
+    public function isAble($ability, $targetModel) {
+        return Gate::authorize($ability, [$targetModel, $this->policyClass]);
+    }
+}
+
+if we authorized directl in controller then we dont need policy it just understand it from the naming convention.
+Gate::authorize('update', $ticket);
+
+----------------------------------------------------------------------------------------------------------------
+
