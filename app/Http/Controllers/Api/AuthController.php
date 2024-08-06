@@ -13,6 +13,7 @@ use App\Permissions\V1\Abilities;
 class AuthController extends Controller
 {
     use ApiResponses;
+
     public function login(LoginUserRequest $request) {
         $request->validated($request->all());
 
@@ -29,8 +30,7 @@ class AuthController extends Controller
                     'API token for ' . $user->email,
                     Abilities::getAbilities($user),
                     now()->addMonth())->plainTextToken
-            ]
-            );
+            ]);
     }
 
     public function logout(Request $request) {

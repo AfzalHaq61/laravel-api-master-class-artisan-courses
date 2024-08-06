@@ -907,3 +907,99 @@ Gate::authorize('update', $ticket);
 
 ----------------------------------------------------------------------------------------------------------------
 
+# Video 18 (Controlling Access with Token Abilities)
+
+# Sanctum's token abilities allow us to essentially assign roles or permissions to users without building a system ourselves or using an external package.
+
+# when the user login its create the token and assign abilities through Abilities class.
+# by this token we can use policies to accross thr project
+public function login(LoginUserRequest $request) {
+    $request->validated($request->all());
+
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        return $this->error('Invalid credentials', 401);
+    }
+
+    $user = User::firstWhere('email', $request->email);
+
+    return $this->ok(
+        'Authenticated',
+        [
+            'token' => $user->createToken(
+                'API token for ' . $user->email,
+                Abilities::getAbilities($user),
+                now()->addMonth())->plainTextToken
+        ]);
+}
+
+# constant differnt abiliities which is assigned through user role
+final class Abilities {
+    public const CreateTicket = 'ticket:create';
+    public const UpdateTicket = 'ticket:update';
+    public const ReplaceTicket = 'ticket:replace';
+    public const DeleteTicket = 'ticket:delete';
+
+    public const UpdateOwnTicket = 'ticket:own:update';
+    public const DeleteOwnTicket = 'ticket:own:delete';
+
+    public const CreateUser = 'user:create';
+    public const UpdateUser = 'user:update';
+    public const ReplaceUser = 'user:replace';
+    public const DeleteUser = 'user:delete';
+
+    public static function getAbilities(User $user) {
+        if ($user->is_manager) {
+            return [
+                self::CreateTicket,
+                self::UpdateTicket,
+                self::ReplaceTicket,
+                self::DeleteTicket,
+                self::CreateUser,
+                self::UpdateUser,
+                self::ReplaceUser,
+                self::DeleteUser,
+            ];
+        } else {
+            return [
+                self::CreateTicket,
+                self::UpdateOwnTicket,
+                self::DeleteOwnTicket
+            ];
+        }
+    }
+}
+
+# its a ticket controller in which we are checking isAble function and passing ability and model which will check that it authorize the user or not.
+public function destroy($ticket_id)
+{
+    try {
+        $ticket = Ticket::findOrFail($ticket_id);
+
+        // policy
+        $this->isAble('delete', $ticket);
+
+        $ticket->delete();
+
+        return $this->ok('Ticket successfully deleted');
+    } catch (ModelNotFoundException $exception) {
+        return $this->error('Ticket cannot found.', 404);
+    }
+}
+
+# It will check authorization by passing the abilt model and policy class.
+public function isAble($ability, $targetModel) {
+    return Gate::authorize($ability, [$targetModel, $this->policyClass]);
+}
+
+# in mentiond policy class it will go to the function by the ability which is passed if they have delete ticket ability then he is good to go if not then it will check whether it have the abilty to remove his ticket if yes then it will check user_id of ticket with user log in id if yes it will remove it of not it will sa unauthorized.
+public function delete(User $user, Ticket $ticket) {
+    if ($user->tokenCan(Abilities::DeleteTicket)) {
+        return true;
+    } else if ($user->tokenCan(Abilities::DeleteOwnTicket)) {
+        return $user->id === $ticket->user_id;
+    }
+
+    return false;
+}
+
+----------------------------------------------------------------------------------------------------------------
