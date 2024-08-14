@@ -1003,3 +1003,84 @@ public function delete(User $user, Ticket $ticket) {
 }
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 19 (Applying Granular Permissions)
+
+# We can use token abilities for anything, including controlling which attributes a user can or cannot change.
+
+# when user have only permission of changing the ticket which user is same to login user the we can do it mapped attributes but that is apply globally and we have to check on lot of routes thats why we wil do it in its persnol request file.
+
+# its aplly glovally thats why its not best practice
+public function mappedAttributes() {
+    $attributeMap = [
+        'data.attributes.title' => 'title',
+        'data.attributes.description' => 'description',
+        'data.attributes.status' => 'status',
+        'data.attributes.createdAt' => 'created_at',
+        'data.attributes.updatedAt' => 'updated_at',
+        'data.relationships.author.data.id' => 'user_id',
+    ];
+
+    $attributesToUpdate = [];
+    foreach ($attributeMap as $key => $attribute) {
+        if ($this->has($key)) {
+            $attributesToUpdate[$attribute] = $this->input($key);
+        }
+    }
+
+    return $attributesToUpdate;
+}
+
+# its best to do it in personal request class
+# prohibited will show that you need this id to update
+public function rules(): array
+    {
+        $rules = [
+            'data.attributes.title' => 'sometimes|string',
+            'data.attributes.description' => 'sometimes|string',
+            'data.attributes.status' => 'sometimes|string|in:A,C,H,X',
+            'data.relationships.author.data.id' => 'sometimes|integer',
+        ];
+
+        if ($this->user()->tokenCan(Abilities::UpdateOwnTicket)) {
+            $rules['data.relationships.author.data.id'] = 'prohibited';
+        }
+
+        return $rules;
+    }
+
+# its user have createonlyticket permission then its relation author id must be equal user id.
+public function rules(): array
+    {
+        $rules = [
+            'data.attributes.title' => 'required|string',
+            'data.attributes.description' => 'required|string',
+            'data.attributes.status' => 'required|string|in:A,C,H,X',
+            'data.relationships.author.data.id' => 'required|integer|exists:users,id'
+        ];
+
+        $user = $this->user();
+
+        if ($this->routeIs('tickets.store')) {
+            if ($user->tokenCan(Abilities::CreateOwnTicket)) {
+                $rules['data.relationships.author.data.id'] .= '|size:' . $user->id;
+            }
+        }
+
+        return $rules;
+    }
+
+# here we will pass model in isAble method instead of model variable because we are created we dont have model data.
+public function store(StoreTicketRequest $request)
+    {
+        try {
+            // policy
+             $this->isAble('store', Ticket::class);
+ 
+             return new TicketResource(Ticket::create($request->mappedAttributes()));
+         } catch (AuthorizationException $ex) {
+             return $this->error('You are not authorized to update that resource', 401);
+         }
+    }
+
+----------------------------------------------------------------------------------------------------------------
