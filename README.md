@@ -1083,4 +1083,12 @@ public function store(StoreTicketRequest $request)
          }
     }
 
+# The line $rules['data.relationships.author.data.id'] .= '|size:' . $user->id; appends an additional validation rule to the existing validation rule for the key 'data.relationships.author.data.id'.
+
+# Existing Rule: Before this line, the rule for 'data.relationships.author.data.id' is 'required|integer|exists:users,id'.
+
+# Appending: The .= '|size:' . $user->id; adds more to this rule. Specifically, it appends the string |size:X, where X is the value of $user->id.
+
+# |size:X is a validation rule in Laravel that ensures the value must be exactly X. So, by appending this rule, the validator will now also check that the id is exactly the same as the current user's id ($user->id).
+
 ----------------------------------------------------------------------------------------------------------------
