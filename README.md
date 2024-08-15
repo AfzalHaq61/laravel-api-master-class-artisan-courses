@@ -1092,3 +1092,33 @@ public function store(StoreTicketRequest $request)
 # |size:X is a validation rule in Laravel that ensures the value must be exactly X. So, by appending this rule, the validator will now also check that the id is exactly the same as the current user's id ($user->id).
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 20 (Implementing the AuthorTicketsController)
+
+# We've covered filtering, handling requests, and permissions. Now we just need to apply all of those concepts to implement the AuthorTicketsController.
+
+# The prepareForValidation() method is used to modify or format the incoming request data before the validation rules are applied. In this case, it’s handling specific logic when the route is 'authors.tickets.store'.
+
+# Here’s a breakdown of how this works:
+
+# Route Check:
+
+# The method checks if the current route matches 'authors.tickets.store' using $this->routeIs('authors.tickets.store').
+# If the route matches, it proceeds to modify the request data.
+# Merging Data:
+
+# $this->merge() is used to add or update the incoming request data.
+# The code 'author' => $this->route('author') is merging a new key 'author' into the request data. The value of this key is set to the result of $this->route('author').
+
+# Effect:
+# $this->route('author') retrieves the 'author' parameter from the route. This typically means that the 'author' parameter is part of the route URL (e.g., /authors/{author}/tickets).
+# By merging this into the request data, you ensure that 'author' is now part of the request's input data, allowing it to be accessed during validation or later in the controller.
+
+# Example:
+# Suppose your route is /authors/123/tickets, and 123 is the author parameter. This method would:
+
+# Add 'author' => 123 to the request data.
+# Now, you can access $request->input('author') in your controller or during validation, which would return 123.
+# This is useful for ensuring that route parameters are available as part of the request's data during validation or processing, even if they # aren't explicitly passed in the request body.
+
+----------------------------------------------------------------------------------------------------------------
