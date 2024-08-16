@@ -1122,3 +1122,9 @@ public function store(StoreTicketRequest $request)
 # This is useful for ensuring that route parameters are available as part of the request's data during validation or processing, even if they # aren't explicitly passed in the request body.
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 21 (Managing Users)
+
+# We've implemented ticket management, and now we need to implement the ability to manage users (with the appropriate permissions). Let's get to it.
+
+----------------------------------------------------------------------------------------------------------------

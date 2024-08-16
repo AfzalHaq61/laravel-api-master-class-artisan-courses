@@ -40,6 +40,4 @@ final class Abilities {
             ];
         }
     }
-
-
 }
