@@ -1010,7 +1010,7 @@ public function delete(User $user, Ticket $ticket) {
 
 # when user have only permission of changing the ticket which user is same to login user the we can do it mapped attributes but that is apply globally and we have to check on lot of routes thats why we wil do it in its persnol request file.
 
-# its aplly glovally thats why its not best practice
+# its aplly globally thats why its not best practice.
 public function mappedAttributes() {
     $attributeMap = [
         'data.attributes.title' => 'title',
@@ -1126,5 +1126,13 @@ public function store(StoreTicketRequest $request)
 # Video 21 (Managing Users)
 
 # We've implemented ticket management, and now we need to implement the ability to manage users (with the appropriate permissions). Let's get to it.
+
+----------------------------------------------------------------------------------------------------------------
+
+# Video 22 (The Principle of Least Privilege)
+
+# I messed up. We all do it. We write some code, come back later, and think it's the worst code we've ever written. We need to apply the Principle of Least Privilege to our validation rules. So let's do it!
+
+# when some code is used more it is the least privlage it should use first in priority.
 
 ----------------------------------------------------------------------------------------------------------------
