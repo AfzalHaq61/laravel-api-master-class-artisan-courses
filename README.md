@@ -1136,3 +1136,11 @@ public function store(StoreTicketRequest $request)
 # when some code is used more it is the least privlage it should use first in priority.
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 23 (Handling Errors)
+
+# We handle some errors, but we need to handle any error that may occur within our application. We also need to return a consistent JSON structure for all of our errors, and we can easily accomplish this with the global exception handler.
+
+# we didnt custome exception because its not working in laravel 11 just leave it now we understand that we have to handle error similerly and we can use customize code of the proejct in laravel lower than 11
+
+----------------------------------------------------------------------------------------------------------------
