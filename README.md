@@ -1144,3 +1144,127 @@ public function store(StoreTicketRequest $request)
 # we didnt custome exception because its not working in laravel 11 just leave it now we understand that we have to handle error similerly and we can use customize code of the proejct in laravel lower than 11
 
 ----------------------------------------------------------------------------------------------------------------
+
+# Video 24 (Documenting Your API with Scribe)
+
+# Documentation is probably the most boring part of any project, but we need to do it. Our API is meant to be used! So, instead of writing the documentation ourselves, let's automate as much as possible by using Scribe.
+
+https://scribe.knuckles.wtf/laravel
+
+# use this link to isntall scribe.
+
+# set configuration. set title of it. It directly takes routes from api you can inlcude and exclude routes in configs.
+
+# set base url ('base_url' => 'http://127.0.0.1:8000')
+# set enable and default to true in auth
+# set name to Authorization in auth
+# set token
+# run php artisan scribe:generate
+
+# dont use auth()->user() because it will give an error while generating the api docs use Auth->user() (a facade) which will not give an error.
+
+/**
+    * Login
+    *
+    * Authenticates the user and returns the user's API token.
+    *
+    * @unauthenticated
+    * @group Authentication
+    * @response 200 {
+    "data": {
+        "token": "{YOUR_AUTH_KEY}"
+        },
+        "message": "Authenticated",
+        "status": 200
+    }
+*/
+
+public function login(LoginUserRequest $request) {
+        $request->validated($request->all());
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return $this->error('Invalid credentials', 401);
+        }
+
+        $user = User::firstWhere('email', $request->email);
+
+        return $this->ok(
+            'Authenticated',
+            [
+                'token' => $user->createToken(
+                    'API token for ' . $user->email,
+                    Abilities::getAbilities($user),
+                    now()->addMonth())->plainTextToken
+            ]);
+    }
+
+# use this 
+# first one (Login) will be a title.
+# second is descripbtion.
+# third is used that this route need authentication or not so its not thats why it is unathenticated.
+# make group of authenticatinn to pull all related routes in it. (@group Authentication)
+# and then write doc for responce.
+
+/**
+     * Get all tickets
+     *
+     * @group Managing Tickets
+     * @queryParam sort string Data field(s) to sort by. Separate multiple fields with commas. Denote descending sort with a minus sign. Example: sort=title,-createdAt
+     * @queryParam filter[status] Filter by status code: A, C, H, X. No-example
+     * @queryParam filter[title] Filter by title. Wildcards are supported. Example: *fix*
+*/
+public function index(TicketFilter $filters)
+{
+    return TicketResource::collection(Ticket::filter($filters)->paginate());
+}
+
+# here we use an extra thing which is query params
+# one is for sort its definition and the way how its work
+# another one is for filter its definition and the way it works
+
+# we also want documentation for every field so we recieve in store method so we call also define rules for its documnetation in request like below
+
+public function bodyParameters() {
+    $documentation = [
+        'data.attributes.title' => [
+            'description' => "The ticket's title (method)",
+            'example' => 'No-example'
+        ],
+        'data.attributes.description' => [
+            'description' => "The ticket's description",
+            'example' => 'No-example',
+        ],
+        'data.attributes.status' => [
+            'description' => "The ticket's status",
+            'example' => 'No-example',
+        ],
+    ];
+
+    if ($this->routeIs('tickets.store')) {
+        $documentation['data.relationships.author.data.id'] = [
+            'description' => 'The author assigned to the ticket.',
+            'example' => 'No-example'
+        ];
+    } else {
+        $documentation['author'] = [
+            'description' => 'The author assigned to the ticket.',
+            'example' => 'No-example'
+        ];
+    }
+
+    return $documentation;
+
+}
+
+# we can also define it before the class method by dot blocks
+
+/**
+    *
+    * @bodparam data.relationships.author.data.id integer The author id. No-example 
+*/
+class StoreTicketRequest extends BaseTicketRequest
+{
+    ....
+}
+
+----------------------------------------------------------------------------------------------------------------

@@ -23,6 +23,8 @@ class ReplaceUserRequest extends BaseUserRequest
     public function rules(): array
     {
         return [
+            'data' => 'required|array',
+            'data.attributes' => 'required|array',
             'data.attributes.name' => 'sometimes|string',
             'data.attributes.email' => 'sometimes|email',
             'data.attributes.isManager' => 'sometimes|boolean',

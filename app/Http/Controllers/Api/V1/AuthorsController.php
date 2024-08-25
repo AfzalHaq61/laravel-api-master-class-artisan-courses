@@ -11,7 +11,11 @@ use App\Http\Requests\Api\V1\UpdateUserRequest;
 class AuthorsController extends ApiController
 {
     /**
-     * Display a listing of the resource.
+     * Get authors.
+     *
+     * Retrieves all users that created a ticket.
+     *
+     * @group Showing Authors
      */
     public function index(AuthorFilter $filters)
     {
@@ -19,7 +23,11 @@ class AuthorsController extends ApiController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Get an author.
+     *
+     * Retrieves all users that created a ticket.
+     *
+     * @group Showing Authors
      */
     public function store(StoreUserRequest $request)
     {
